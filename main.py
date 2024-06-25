@@ -185,4 +185,109 @@ with st.container():
         with classification : 
             st.write("""# Classification""")
             st.info("## Random Forest")
-            st.write(""" > Random Forest adalah algoritma machine learning yang menggabungkan keluaran dari beberapa decision tree untuk mencapai satu hasil. Random Forest bekerja dengan membangun beberapa decision tree dan menggabungkannya demi mend
+            st.write(""" > Random Forest adalah algoritma machine learning yang menggabungkan keluaran dari beberapa decision tree untuk mencapai satu hasil. Random Forest bekerja dengan membangun beberapa decision tree dan menggabungkannya demi mendapatkan prediksi yang lebih stabil dan akurat. Forest atau ‘Hutan’ yang dibangun oleh Random Forest adalah kumpulan decision tree di mana biasanya dilatih dengan metode bagging. 
+            """)
+            
+            from sklearn.ensemble import RandomForestClassifier
+            from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, ConfusionMatrixDisplay
+            from sklearn.metrics import classification_report
+            import warnings 
+            warnings. filterwarnings('ignore')
+            rf    = RandomForestClassifier(max_depth=1)
+            rf.fit(X_train, y_train)
+            y_pred  =  rf.predict(X_test)
+            rf_accuracy  = round(100*accuracy_score(y_test, y_pred),1)
+            rf_eval = classification_report(y_test, y_pred,output_dict = True)
+            rf_eval_df = pd.DataFrame(rf_eval).transpose()
+            st.header("Accuracy Result")
+            st.info(f"Akurasi pelayanan hotel Jakarta menggunakan metode Random Forest adalah : **{rf_accuracy}%** ")
+#
+        with implementation:
+            st.write("# Implementation")
+            st.write("### Add Review :")
+
+            # Lowercase
+            def text_lowercase(text):
+                return text.lower()
+            # Remove number
+            def remove_numbers(text):
+                result = re.sub(r'\d+', '', text)
+                return result
+            # Remove punctuation
+            def remove_punctuation(text):
+                translator = str.maketrans('', '', string.punctuation)
+                return text.translate(translator)
+            # Remove whitespace
+            def remove_whitespace(text):
+                return  " ".join(text.split())
+            # Tokenization
+            # Stop Words Removal
+            stop_words = set(chain(stopwords.words('indonesian'),stopwords.words('english')))
+            # Define a function to remove stop words from a sentence 
+            def remove_stop_words(text): 
+              # Use a list comprehension to remove stop words 
+              filtered_words = [word for word in text if word not in stop_words] 
+              # Join the filtered words back into a sentence 
+              return ' '.join(filtered_words)
+            # Stemming
+            def stemming(text):
+                factory = StemmerFactory()
+                stemmer = factory.create_stemmer()
+                text = stemmer.stem(text)
+                return text
+    
+            # Input teks
+            input_text = st.text_input('Comment')
+
+            # Jika teks tersedia
+            if input_text:
+                #Preprocessing teks input
+                l0w=text_lowercase(input_text)
+                l0w1=remove_numbers(l0w)
+                l0w2=remove_punctuation(l0w1)
+                l0w3=remove_whitespace(l0w2)
+                l0w4=word_tokenize(l0w3)
+                l0w5=remove_stop_words(l0w4)
+                l0w6=stemming(l0w5)
+                #TF - IDF
+                from sklearn.feature_extraction.text import TfidfVectorizer,CountVectorizer
+                countvectorizer = CountVectorizer()
+                tfidfvectorizer = TfidfVectorizer()
+                l0w6=[l0w6]
+                count_wm = countvectorizer.fit_transform(l0w6)
+                tfidf_wm = tfidfvectorizer.fit_transform(l0w6)
+                count_tokens = countvectorizer.get_feature_names_out()
+                tfidf_tokens = tfidfvectorizer.get_feature_names_out()
+                df_countvect = pd.DataFrame(data = count_wm.toarray(),columns = count_tokens)
+                df_tfidfvect = pd.DataFrame(data = tfidf_wm.toarray(),columns = tfidf_tokens)
+                #PCA
+                # Impor library yang dibutuhkan
+                from sklearn.decomposition import PCA
+
+                # Inisialisasi objek PCA dengan 2 komponen
+                pcA = PCA(n_components=1)
+
+                # Melakukan fit transform pada data
+                X_pcA = pcA.fit_transform(df_countvect)
+
+                # Menampilkan hasil analisis sentimen
+                st.subheader('Hasil Analisis Sentimen')
+                st.write('Teks Asli :')
+                st.warning(input_text)
+                st.write('Hasil :')
+#                 st.write(l0w)
+#                 st.write(l0w1)
+#                 st.write(l0w2)
+#                 st.write(l0w3)
+#                 st.write(l0w4)
+#                 st.write(l0w5)
+#                 st.write(l0w6)
+#                 st.write(df_countvect)
+#                 st.write(X_pcA)
+                FIRST_IDX=0
+                use_model = rf
+                predictresult = use_model.predict(X_pca)[FIRST_IDX]
+                if predictresult == 0:
+                            st.info(f"Komentar anda berlabel Negatif.")
+                elif predictresult == 1:
+                            st.success(f"Komentar anda berlabel Positif.")
