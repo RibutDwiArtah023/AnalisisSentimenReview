@@ -64,7 +64,7 @@ def stem(tokens):
 st.set_page_config(page_title="Informatika Pariwisata", page_icon='')
 
 # Sidebar menu
-menu = st.sidebar.selectbox("Menu", ["Home", "Implementation"])
+menu = st.sidebar.selectbox("Menu", ["Home", "Classification", "Implementation"])
 
 if menu == "Home":
     st.title("Informatika Pariwisata")
@@ -75,33 +75,18 @@ if menu == "Home":
     st.markdown("# Metode Usulan")
     st.info("Random Forest")
 
-elif menu == "Implementation":
-    st.title("Informatika Pariwisata - Ribut Dwi Artah (200411100023)")
-    st.write("# About Dataset")
-    st.write("## Content")
-    st.markdown("1. **Name**: Nama pengguna yang memberikan komentar di Warung Amboina.")
-    st.markdown("2. **Text**: Komentar yang diberikan oleh pengguna.")
-    st.markdown("3. **Label**: Label positif dan negatif dari cita rasa makanan di Warung Amboina.")
-    st.markdown("4. **Review URL**: Link halaman ulasan di Google Maps untuk Warung Amboina.")
-    st.markdown("5. **Reviewer URL**: Link profil pengguna yang menambahkan ulasan di Google Maps untuk Warung Amboina.")
-    st.markdown("6. **Stars**: Bintang yang diberikan oleh pengguna saat mengulas di Google Maps untuk Warung Amboina.")
-    st.markdown("7. **Publish at**: Waktu pengguna menambahkan ulasan di Google Maps untuk Warung Amboina.")
+elif menu == "Classification":
+    st.title("Classification")
+    st.write("# Classification")
+    st.info("## Random Forest")
 
-    st.write("## Repository Github")
-    st.markdown("Klik link di bawah ini untuk mengakses kode sumber:")
-    st.markdown("[Link Repository Github](https://github.com/RibutDwiArtah023/AnalisisSentimenReview)")
-
-    st.write("# Load Dataset")
+    # Load dataset
     df = pd.read_csv("https://github.com/RibutDwiArtah023/AnalisisSentimenReview/raw/main/reviewHotelJakarta.csv")
     df['label'] = df['rating'].map({1.0:'Negatif', 2.0:'Negatif', 3.0:'Negatif', 4.0:'Positif', 5.0:'Positif'})
     sumdata = len(df)
     st.success(f"Total Data: {sumdata}")
 
-    st.write("## Dataset Explanation")
-    st.info("Classes:")
-    st.markdown("- Positif")
-    st.markdown("- Negatif")
-
+    # Preprocessing
     st.write("## Preprocessing")
     st.write("### Text Cleaning")
     df['cleaned_review'] = df['review'].apply(cleaning)
@@ -129,6 +114,7 @@ elif menu == "Implementation":
     X_pca = pca.fit_transform(X.toarray())
     st.dataframe(pd.DataFrame(X_pca, columns=['PCA1', 'PCA2', 'PCA3', 'PCA4']).head(10))
 
+    # Classification
     st.write("# Classification")
     st.info("## Random Forest")
     model = RandomForestClassifier()
@@ -146,7 +132,8 @@ elif menu == "Implementation":
     st.write("### Classification Report")
     st.write(metrics.classification_report(y_test, y_pred))
 
-    st.write("# Implementation")
+elif menu == "Implementation":
+    st.title("Implementation")
     st.info("## Predict Sentiment")
     user_input = st.text_area("Enter your review", "Type here...")
     cleaned_input = cleaning(user_input)
@@ -154,9 +141,20 @@ elif menu == "Implementation":
     no_stopwords = remove_stop_words(tokens)
     stemmed = stem(no_stopwords)
     processed_input = ' '.join(stemmed)
-    input_vector = tfidf_vectorizer.transform([processed_input])
-    input_pca = pca.transform(input_vector.toarray())
-    prediction = model.predict(input_pca)
+    
+    # TF-IDF Vectorization
+    tfidf_vectorizer = TfidfVectorizer()
+    X = tfidf_vectorizer.fit_transform([processed_input])
+    
+    # Dimensionality Reduction using PCA
+    pca = PCA(n_components=4)
+    X_pca = pca.fit_transform(X.toarray())
+    
+    # Load the trained model
+    model = RandomForestClassifier()  # Load your trained model here
+
+    # Predict using the loaded model
+    prediction = model.predict(X_pca)
 
     if prediction == 'Positif':
         st.success("The review sentiment is Positive")
