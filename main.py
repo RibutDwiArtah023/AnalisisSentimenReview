@@ -65,7 +65,7 @@ with st.container():
 
             st.write("## Repository Github")
             st.write(" Click the link below to access the source code")
-            repo = "https://github.com/RibutDwiArtah023/InformatikaPariwisata"
+            repo = "https://github.com/RibutDwiArtah023/AnalisisSentimenReview"
             st.markdown(f'[ Link Repository Github ]({repo})')
         with dataset:
             st.write("""# Load Dataset""")
