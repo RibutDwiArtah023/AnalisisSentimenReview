@@ -98,6 +98,9 @@ with st.container():
             > Preprocessing data adalah proses menyiapkan data mentah dan membuatnya cocok untuk model pembelajaran mesin. Ini adalah langkah pertama dan penting saat membuat model pembelajaran mesin. Saat membuat proyek pembelajaran mesin, kami tidak selalu menemukan data yang bersih dan terformat.
             """)
             st.info("## Cleaned Data")
+            df['review'] = df['review'].apply(lambda x: cleaning(x))
+            df
+            st.info("## Cleaned Data")
             data = pd.read_csv('https://github.com/RibutDwiArtah023/AnalisisSentimenReview/raw/main/cleanedtextNew.csv', index_col=0)
             data
             Sumdata = len(data)
