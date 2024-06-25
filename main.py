@@ -102,7 +102,7 @@ elif menu == "Implementation":
     st.markdown("- Positif")
     st.markdown("- Negatif")
 
-    st.info("## Preprocessing")
+    st.write("## Preprocessing")
     st.write("### Text Cleaning")
     df['cleaned_review'] = df['review'].apply(cleaning)
     st.dataframe(df[['review', 'cleaned_review']].head(10))
