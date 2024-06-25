@@ -110,8 +110,8 @@ with st.container():
             tfidf = TfidfVectorizer()
             countwm = CountVectorizer()
             documents_list = data.values.reshape(-1,).tolist()
-            count_wm = countwm.fit_transform(data['text_tokens'].apply(lambda x: np.str_(x)))
-            train_data = tfidf.fit_transform(data['text_tokens'].apply(lambda x: np.str_(x)))
+            count_wm = countwm.fit_transform(data['review_tokens'].apply(lambda x: np.str_(x)))
+            train_data = tfidf.fit_transform(data['review_tokens'].apply(lambda x: np.str_(x)))
             count_array = count_wm.toarray()
             tf_idf_array = train_data.toarray()
             words_set = tfidf.get_feature_names_out()
@@ -131,9 +131,9 @@ with st.container():
             from sklearn.model_selection import train_test_split
             from sklearn.preprocessing import LabelEncoder
             label_encoder = LabelEncoder() 
-            data['Label']= label_encoder.fit_transform(data['Label'])
+            data['label']= label_encoder.fit_transform(data['label'])
 
-            y = data['Label'].values
+            y = data['label'].values
             # y = data_vec.label.values
             X_train, X_test, y_train, y_test = train_test_split(X_pca, y ,test_size = 0.7, random_state =1)
 
