@@ -190,7 +190,7 @@ with st.container():
             input_pca = pca.transform(input_vector.toarray())
             prediction = model.predict(input_pca)
 
-            if prediction == 1:
-                st.success("The review is Positive")
+            if prediction == 'Positif':
+                st.success("The review sentiment is Positive")
             else:
-                st.error("The review is Negative")
+                st.error("The review sentiment is Negative")
