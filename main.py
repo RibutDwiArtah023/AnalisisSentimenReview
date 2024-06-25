@@ -32,9 +32,9 @@ with st.container():
         st.markdown('<h1 style = "text-align: center;"> <b>Informatika Pariwisata</b> </h1>', unsafe_allow_html = True)
         st.markdown('')
         st.markdown("# Judul Project ")
-        st.info("Analisis Sentimen Review Terhadap Pelayanan Hotel Jakarta menggunakan metode Random Forest dan Term Frequency-Inverse Document Frequency")
+        st.info("Analisis Sentimen Review Terhadap Pelayanan Hotel di Kota Jakarta menggunakan metode Random Forest dan Term Frequency-Inverse Document Frequency")
         st.markdown("# Dataset ")
-        st.info("Data yang digunakan pada laporan ini adalah data ulasan pelayanan hotel Jakarta. Data yang diambil dari Warung Amboina tersebut sebanyak lebih kurang 500 data dengan data yang diambil dalam waktu terdekat.")
+        st.info("Data yang digunakan pada proyek ini adalah data ulasan pelayanan hotel di kota Jakarta. Data diperoleh dari informasi yang diekstraksi secara otomatis dari halaman web dengan metode web scrapping dengan lokasi pengumpulan data didaerah Jakarta dengan kategori khusu yaitu "Hotel" dengan data yang didapatkan sebanyak 210 data.")
         st.markdown("# Metode Usulan ")
         st.info("Random Forest")
         
@@ -47,20 +47,14 @@ with st.container():
             
             st.write("## Content")
             st.write("""
-            1.  Name :
-                > Tabel Name berisi nama pengguna yang memberikan komentar di Warung Amboina.
-            2.  Text :
-                > Tabel Text berisi komentar yang diberikan oleh pengguna.
-            3.  Label :
-                > Tabel Label berisi label Positif dan Negatif dari cita rasa makanan di Warung Amboina.
-            4. Review URL :
-                > Tabel Review URL berisi link yang mengarahkan ke halaman ulasan yang ada di Google Maps pada Warung Amboina.
-            5. Reviewer URL :
-                > Tabel Reviewer URL berisi link yang mengarahkan ke profil pengguna yang menambahkan ulasan yang ada di Google Maps pada Warung Amboina.
-            6. Stars :
-                > Tabel Stars berisi bintang yang diberikan oleh pengguna saat mengulas Warung Amboina di Google Maps.
-            7. Publish at :
-                > Tabel Publish at berisi waktu pengguna menambahkan ulasan di Warung Amboina pada Google Maps.
+            1.  Hotel Name:
+                > Tabel Hotel Name berisi nama hotel di Kota Jakarta yang sedang diulas.
+            2.  Name :
+                > Tabel Name berisi nama pengguna yang memberikan komentar pada hotel di Jakarta.
+            3.  Rating :
+                > Tabel Rating berisi nilai yang diberikan oleh pengguna saat mengulas.
+            4. Review :
+                > Tabel Review berisi komentar yang diberikan oleh pengguna hotel.
                     """)
 
             st.write("## Repository Github")
@@ -156,7 +150,7 @@ with st.container():
             rf_eval = classification_report(y_test, y_pred,output_dict = True)
             rf_eval_df = pd.DataFrame(rf_eval).transpose()
             st.header("Accuracy Result")
-            st.info(f"Akurasi pelayanan hotel Jakarta menggunakan metode Random Forest adalah : **{rf_accuracy}%** ")
+            st.info(f"Akurasi review hotel di Jakarta menggunakan metode Random Forest adalah : **{rf_accuracy}%** ")
 #
         with implementation:
             st.write("# Implementation")
