@@ -4,55 +4,15 @@ import numpy as np
 import re
 import string
 import nltk
+nltk.download('popular')
+nltk.download('stopwords')
 from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
+from nltk.corpus import stopwords 
 from itertools import chain
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 from streamlit_option_menu import option_menu
 st.set_page_config(page_title="Informatika Pariwisata", page_icon='')
-
-# Function for text cleaning
-def cleaning(text):
-    # HTML Tag Removal
-    text = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});').sub('', str(text))
-
-    # Case folding
-    text = text.lower()
-
-    # Trim text
-    text = text.strip()
-
-    # Remove punctuations, special characters, and double spaces
-    text = re.compile('<.*?>').sub('', text)
-    text = re.compile('[%s]' % re.escape(string.punctuation)).sub(' ', text)
-    text = re.sub('\s+', ' ', text)
-
-    # Number removal
-    text = re.sub(r'\[[0-9]*\]', ' ', text)
-    text = re.sub(r'[^\w\s]', '', str(text).lower().strip())
-    text = re.sub(r'\d', ' ', text)
-    text = re.sub(r'\s+', ' ', text)
-
-    # Replace 'nan' with whitespace to be removed later
-    text = re.sub('nan', '', text)
-
-    return text
-
-# Function for tokenization
-def tokenize(text):
-    return word_tokenize(text)
-
-# Function for stop words removal
-stop_words = set(chain(stopwords.words('indonesian'), stopwords.words('english')))
-def remove_stop_words(tokens):
-    return [w for w in tokens if not w in stop_words]
-
-# Function for stemming
-factory = StemmerFactory()
-stemmer = factory.create_stemmer()
-def stem(tokens):
-    return [stemmer.stem(w) for w in tokens]
 
 with st.container():
     with st.sidebar:
@@ -138,14 +98,9 @@ with st.container():
             > Preprocessing data adalah proses menyiapkan data mentah dan membuatnya cocok untuk model pembelajaran mesin. Ini adalah langkah pertama dan penting saat membuat model pembelajaran mesin. Saat membuat proyek pembelajaran mesin, kami tidak selalu menemukan data yang bersih dan terformat.
             """)
             st.info("## Cleaned Data")
-            
-            # Apply cleaning, tokenization, stop words removal, and stemming
-            df['cleaned_text'] = df['review'].apply(cleaning)
-            df['review_tokens'] = df['cleaned_text'].apply(tokenize)
-            df['review_tokens'] = df['review_tokens'].apply(remove_stop_words)
-            df['review_tokens'] = df['review_tokens'].apply(stem)
-
-            Sumdata = len(df)
+            data = pd.read_csv('https://github.com/RibutDwiArtah023/AnalisisSentimenReview/raw/main/cleanedtextNew.csv', index_col=0)
+            data
+            Sumdata = len(data)
             st.success(f"#### Total Cleaned Data : {Sumdata}")
             
             st.info("## TF - IDF (Term Frequency Inverse Document Frequency)")
@@ -154,9 +109,9 @@ with st.container():
             tfidfvectorizer = TfidfVectorizer()
             tfidf = TfidfVectorizer()
             countwm = CountVectorizer()
-            documents_list = df['review_tokens'].apply(lambda x: ' '.join(x)).tolist()
-            count_wm = countwm.fit_transform(documents_list)
-            train_data = tfidf.fit_transform(documents_list)
+            documents_list = data.values.reshape(-1,).tolist()
+            count_wm = countwm.fit_transform(data['review_tokens'].apply(lambda x: np.str_(x)))
+            train_data = tfidf.fit_transform(data['review_tokens'].apply(lambda x: np.str_(x)))
             count_array = count_wm.toarray()
             tf_idf_array = train_data.toarray()
             words_set = tfidf.get_feature_names_out()
@@ -176,9 +131,10 @@ with st.container():
             from sklearn.model_selection import train_test_split
             from sklearn.preprocessing import LabelEncoder
             label_encoder = LabelEncoder() 
-            df['label']= label_encoder.fit_transform(df['label'])
+            data['label']= label_encoder.fit_transform(data['label'])
 
-            y = df['label'].values
+            y = data['label'].values
+            # y = data_vec.label.values
             X_train, X_test, y_train, y_test = train_test_split(X_pca, y ,test_size = 0.7, random_state =1)
 
 
