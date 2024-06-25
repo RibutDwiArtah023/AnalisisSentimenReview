@@ -4,15 +4,55 @@ import numpy as np
 import re
 import string
 import nltk
-nltk.download('popular')
-nltk.download('stopwords')
 from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords 
+from nltk.corpus import stopwords
 from itertools import chain
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 from streamlit_option_menu import option_menu
 st.set_page_config(page_title="Informatika Pariwisata", page_icon='')
+
+# Function for text cleaning
+def cleaning(text):
+    # HTML Tag Removal
+    text = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});').sub('', str(text))
+
+    # Case folding
+    text = text.lower()
+
+    # Trim text
+    text = text.strip()
+
+    # Remove punctuations, special characters, and double spaces
+    text = re.compile('<.*?>').sub('', text)
+    text = re.compile('[%s]' % re.escape(string.punctuation)).sub(' ', text)
+    text = re.sub('\s+', ' ', text)
+
+    # Number removal
+    text = re.sub(r'\[[0-9]*\]', ' ', text)
+    text = re.sub(r'[^\w\s]', '', str(text).lower().strip())
+    text = re.sub(r'\d', ' ', text)
+    text = re.sub(r'\s+', ' ', text)
+
+    # Replace 'nan' with whitespace to be removed later
+    text = re.sub('nan', '', text)
+
+    return text
+
+# Function for tokenization
+def tokenize(text):
+    return word_tokenize(text)
+
+# Function for stop words removal
+stop_words = set(chain(stopwords.words('indonesian'), stopwords.words('english')))
+def remove_stop_words(tokens):
+    return [w for w in tokens if not w in stop_words]
+
+# Function for stemming
+factory = StemmerFactory()
+stemmer = factory.create_stemmer()
+def stem(tokens):
+    return [stemmer.stem(w) for w in tokens]
 
 with st.container():
     with st.sidebar:
@@ -98,12 +138,14 @@ with st.container():
             > Preprocessing data adalah proses menyiapkan data mentah dan membuatnya cocok untuk model pembelajaran mesin. Ini adalah langkah pertama dan penting saat membuat model pembelajaran mesin. Saat membuat proyek pembelajaran mesin, kami tidak selalu menemukan data yang bersih dan terformat.
             """)
             st.info("## Cleaned Data")
-            df['review'] = df['review'].apply(lambda x: cleaning(x))
-            df
-            st.info("## Cleaned Data")
-            data = pd.read_csv('https://github.com/RibutDwiArtah023/AnalisisSentimenReview/raw/main/cleanedtextNew.csv', index_col=0)
-            data
-            Sumdata = len(data)
+            
+            # Apply cleaning, tokenization, stop words removal, and stemming
+            df['cleaned_text'] = df['review'].apply(cleaning)
+            df['review_tokens'] = df['cleaned_text'].apply(tokenize)
+            df['review_tokens'] = df['review_tokens'].apply(remove_stop_words)
+            df['review_tokens'] = df['review_tokens'].apply(stem)
+
+            Sumdata = len(df)
             st.success(f"#### Total Cleaned Data : {Sumdata}")
             
             st.info("## TF - IDF (Term Frequency Inverse Document Frequency)")
@@ -112,9 +154,9 @@ with st.container():
             tfidfvectorizer = TfidfVectorizer()
             tfidf = TfidfVectorizer()
             countwm = CountVectorizer()
-            documents_list = data.values.reshape(-1,).tolist()
-            count_wm = countwm.fit_transform(data['review_tokens'].apply(lambda x: np.str_(x)))
-            train_data = tfidf.fit_transform(data['review_tokens'].apply(lambda x: np.str_(x)))
+            documents_list = df['review_tokens'].apply(lambda x: ' '.join(x)).tolist()
+            count_wm = countwm.fit_transform(documents_list)
+            train_data = tfidf.fit_transform(documents_list)
             count_array = count_wm.toarray()
             tf_idf_array = train_data.toarray()
             words_set = tfidf.get_feature_names_out()
@@ -134,119 +176,13 @@ with st.container():
             from sklearn.model_selection import train_test_split
             from sklearn.preprocessing import LabelEncoder
             label_encoder = LabelEncoder() 
-            data['label']= label_encoder.fit_transform(data['label'])
+            df['label']= label_encoder.fit_transform(df['label'])
 
-            y = data['label'].values
-            # y = data_vec.label.values
+            y = df['label'].values
             X_train, X_test, y_train, y_test = train_test_split(X_pca, y ,test_size = 0.7, random_state =1)
 
 
         with classification : 
             st.write("""# Classification""")
             st.info("## Random Forest")
-            st.write(""" > Random Forest adalah algoritma machine learning yang menggabungkan keluaran dari beberapa decision tree untuk mencapai satu hasil. Random Forest bekerja dengan membangun beberapa decision tree dan menggabungkannya demi mendapatkan prediksi yang lebih stabil dan akurat. Forest atau ‘Hutan’ yang dibangun oleh Random Forest adalah kumpulan decision tree di mana biasanya dilatih dengan metode bagging. 
-            """)
-            
-            from sklearn.ensemble import RandomForestClassifier
-            from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, ConfusionMatrixDisplay
-            from sklearn.metrics import classification_report
-            import warnings 
-            warnings. filterwarnings('ignore')
-            rf    = RandomForestClassifier(max_depth=1)
-            rf.fit(X_train, y_train)
-            y_pred  =  rf.predict(X_test)
-            rf_accuracy  = round(100*accuracy_score(y_test, y_pred),1)
-            rf_eval = classification_report(y_test, y_pred,output_dict = True)
-            rf_eval_df = pd.DataFrame(rf_eval).transpose()
-            st.header("Accuracy Result")
-            st.info(f"Akurasi pelayanan hotel Jakarta menggunakan metode Random Forest adalah : **{rf_accuracy}%** ")
-#
-        with implementation:
-            st.write("# Implementation")
-            st.write("### Add Review :")
-
-            # Lowercase
-            def text_lowercase(text):
-                return text.lower()
-            # Remove number
-            def remove_numbers(text):
-                result = re.sub(r'\d+', '', text)
-                return result
-            # Remove punctuation
-            def remove_punctuation(text):
-                translator = str.maketrans('', '', string.punctuation)
-                return text.translate(translator)
-            # Remove whitespace
-            def remove_whitespace(text):
-                return  " ".join(text.split())
-            # Tokenization
-            # Stop Words Removal
-            stop_words = set(chain(stopwords.words('indonesian'),stopwords.words('english')))
-            # Define a function to remove stop words from a sentence 
-            def remove_stop_words(text): 
-              # Use a list comprehension to remove stop words 
-              filtered_words = [word for word in text if word not in stop_words] 
-              # Join the filtered words back into a sentence 
-              return ' '.join(filtered_words)
-            # Stemming
-            def stemming(text):
-                factory = StemmerFactory()
-                stemmer = factory.create_stemmer()
-                text = stemmer.stem(text)
-                return text
-    
-            # Input teks
-            input_text = st.text_input('Comment')
-
-            # Jika teks tersedia
-            if input_text:
-                #Preprocessing teks input
-                l0w=text_lowercase(input_text)
-                l0w1=remove_numbers(l0w)
-                l0w2=remove_punctuation(l0w1)
-                l0w3=remove_whitespace(l0w2)
-                l0w4=word_tokenize(l0w3)
-                l0w5=remove_stop_words(l0w4)
-                l0w6=stemming(l0w5)
-                #TF - IDF
-                from sklearn.feature_extraction.text import TfidfVectorizer,CountVectorizer
-                countvectorizer = CountVectorizer()
-                tfidfvectorizer = TfidfVectorizer()
-                l0w6=[l0w6]
-                count_wm = countvectorizer.fit_transform(l0w6)
-                tfidf_wm = tfidfvectorizer.fit_transform(l0w6)
-                count_tokens = countvectorizer.get_feature_names_out()
-                tfidf_tokens = tfidfvectorizer.get_feature_names_out()
-                df_countvect = pd.DataFrame(data = count_wm.toarray(),columns = count_tokens)
-                df_tfidfvect = pd.DataFrame(data = tfidf_wm.toarray(),columns = tfidf_tokens)
-                #PCA
-                # Impor library yang dibutuhkan
-                from sklearn.decomposition import PCA
-
-                # Inisialisasi objek PCA dengan 2 komponen
-                pcA = PCA(n_components=1)
-
-                # Melakukan fit transform pada data
-                X_pcA = pcA.fit_transform(df_countvect)
-
-                # Menampilkan hasil analisis sentimen
-                st.subheader('Hasil Analisis Sentimen')
-                st.write('Teks Asli :')
-                st.warning(input_text)
-                st.write('Hasil :')
-#                 st.write(l0w)
-#                 st.write(l0w1)
-#                 st.write(l0w2)
-#                 st.write(l0w3)
-#                 st.write(l0w4)
-#                 st.write(l0w5)
-#                 st.write(l0w6)
-#                 st.write(df_countvect)
-#                 st.write(X_pcA)
-                FIRST_IDX=0
-                use_model = rf
-                predictresult = use_model.predict(X_pca)[FIRST_IDX]
-                if predictresult == 0:
-                            st.info(f"Komentar anda berlabel Negatif.")
-                elif predictresult == 1:
-                            st.success(f"Komentar anda berlabel Positif.")
+            st.write(""" > Random Forest adalah algoritma machine learning yang menggabungkan keluaran dari beberapa decision tree untuk mencapai satu hasil. Random Forest bekerja dengan membangun beberapa decision tree dan menggabungkannya demi mend
