@@ -88,15 +88,18 @@ with st.container():
             with col2:
                 st.info("#### Empty Data")
                 st.write(df.isnull().sum())
+                #===================================
+             
+                
                 
         with preprocessing : 
             st.write("""# Preprocessing""")
             st.write("""
             > Preprocessing data adalah proses menyiapkan data mentah dan membuatnya cocok untuk model pembelajaran mesin. Ini adalah langkah pertama dan penting saat membuat model pembelajaran mesin. Saat membuat proyek pembelajaran mesin, kami tidak selalu menemukan data yang bersih dan terformat.
             """)
-            
             st.info("## Text Cleaning")
-
+            
+            # Text Cleaning
             def cleaning(text):
                 # HTML Tag Removal
                 text = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});').sub('', str(text))
@@ -107,7 +110,7 @@ with st.container():
                 # Trim text
                 text = text.strip()
 
-                # Remove punctuations, special characters, and double spaces
+                # Remove punctuations, karakter spesial, and spasi ganda
                 text = re.compile('<.*?>').sub('', text)
                 text = re.compile('[%s]' % re.escape(string.punctuation)).sub(' ', text)
                 text = re.sub('\s+', ' ', text)
@@ -118,50 +121,37 @@ with st.container():
                 text = re.sub(r'\d', ' ', text)
                 text = re.sub(r'\s+', ' ', text)
 
-                # Replace 'nan' with whitespace to be removed later
+                # Mengubah text 'nan' dengan whitespace agar nantinya dapat dihapus
                 text = re.sub('nan', '', text)
 
                 return text
-            
-            df['cleaned_text'] = df['review'].apply(cleaning)
-            
+
+            df['review'] = df['review'].apply(lambda x: cleaning(x))
+            df[["review"]].head()
+
             st.info("## Tokenization")
+            # Tokenizing Abstrak
+            df['review_tokens'] = df['review'].apply(lambda x: word_tokenize(x))
+            df[["review", "review_tokens"]].head()
 
-            # Function for tokenization
-            def tokenize(text):
-                return word_tokenize(text)
-
-            df['review_tokens'] = df['cleaned_text'].apply(tokenize)
-            
             st.info("## Stop Words Removal")
-
-            # Function for stop words removal
             stop_words = set(chain(stopwords.words('indonesian'), stopwords.words('english')))
-            def remove_stop_words(tokens):
-                return [w for w in tokens if not w in stop_words]
+            df['review_tokens'] = df['review_tokens'].apply(lambda x: [w for w in x if not w in stop_words])
+            df[["review", "review_tokens"]].head(20)
 
-            df['review_tokens'] = df['review_tokens'].apply(remove_stop_words)
-            
             st.info("## Stemming")
-
-            # Function for stemming
             factory = StemmerFactory()
             stemmer = factory.create_stemmer()
-            def stem(tokens):
-                return [stemmer.stem(w) for w in tokens]
-
-            df['review_tokens'] = df['review_tokens'].apply(stem)
+            df['review_tokens'] = df['review_tokens'].apply(lambda x: stemmer.stem(' '.join(x)).split(' '))
+            df[["review", "review_tokens"]].head(20)
             
-            st.info("## Cleaned Data")
-            st.write(df[['review', 'review_tokens']].head(20))
-
             st.info("## TF - IDF (Term Frequency Inverse Document Frequency)")
-            from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+            from sklearn.feature_extraction.text import TfidfVectorizer,CountVectorizer
             countvectorizer = CountVectorizer()
             tfidfvectorizer = TfidfVectorizer()
             tfidf = TfidfVectorizer()
             countwm = CountVectorizer()
-            documents_list = df['review_tokens'].apply(lambda x: ' '.join(x)).values.reshape(-1,).tolist()
+            documents_list = df['review_tokens'].apply(lambda x: ' '.join(x)).tolist()
             count_wm = countwm.fit_transform(documents_list)
             train_data = tfidf.fit_transform(documents_list)
             count_array = count_wm.toarray()
@@ -172,21 +162,17 @@ with st.container():
             df_tf_idf
             
             st.info("## Dimension Reduction using PCA")
-            # Import library yang dibutuhkan
             from sklearn.decomposition import PCA
-            # Inisialisasi objek PCA dengan 4 komponen
             pca = PCA(n_components=4)
-            # Melakukan fit transform pada data
             X_pca = pca.fit_transform(df_tf_idf)
             X_pca.shape
             
             from sklearn.model_selection import train_test_split
             from sklearn.preprocessing import LabelEncoder
             label_encoder = LabelEncoder() 
-            df['label']= label_encoder.fit_transform(df['label'])
+            df['label'] = label_encoder.fit_transform(df['label'])
 
             y = df['label'].values
-            # y = data_vec.label.values
             X_train, X_test, y_train, y_test = train_test_split(X_pca, y ,test_size = 0.7, random_state =1)
 
         with classification : 
