@@ -69,7 +69,7 @@ with st.container():
             st.markdown(f'[ Link Repository Github ]({repo})')
         with dataset:
             st.write("""# Load Dataset""")
-            df = pd.read_csv("https://github.com/RibutDwiArtah023/InformatikaPariwisata/raw/main/reviewHotelJakarta.csv")
+            df = pd.read_csv("https://github.com/RibutDwiArtah023/AnalisisSentimenReview/raw/main/reviewHotelJakarta.csv")
             df['label'] = df['rating'].map({1.0:'Negatif', 2.0:'Negatif', 3.0:'Negatif', 4.0:'Positif', 5.0:'Positif'})
             df
             sumdata = len(df)
@@ -98,7 +98,7 @@ with st.container():
             > Preprocessing data adalah proses menyiapkan data mentah dan membuatnya cocok untuk model pembelajaran mesin. Ini adalah langkah pertama dan penting saat membuat model pembelajaran mesin. Saat membuat proyek pembelajaran mesin, kami tidak selalu menemukan data yang bersih dan terformat.
             """)
             st.info("## Cleaned Data")
-            data = pd.read_csv('https://github.com/RibutDwiArtah023/InformatikaPariwisata/raw/main/cleanedtextNew.csv', index_col=0)
+            data = pd.read_csv('https://github.com/RibutDwiArtah023/AnalisisSentimenReview/raw/main/cleanedtextNew.csv', index_col=0)
             data
             Sumdata = len(data)
             st.success(f"#### Total Cleaned Data : {Sumdata}")
