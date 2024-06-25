@@ -1,0 +1,9 @@
+streamlit>=1.36.0
+streamlit-extras==0.2.4
+streamlit-option-menu==0.3.2
+bokeh==3.0.2
+scikit-learn==1.5.0
+nltk==3.5
+sastrawi==1.0.1
+streamlit-faker==0.0.3  # Gunakan versi yang tersedia
+matplotlib
