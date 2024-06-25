@@ -34,7 +34,7 @@ with st.container():
         st.markdown("# Judul Project ")
         st.info("Analisis Sentimen Review Terhadap Pelayanan Hotel di Kota Jakarta menggunakan metode Random Forest dan Term Frequency-Inverse Document Frequency")
         st.markdown("# Dataset ")
-        st.info("Data yang digunakan pada proyek ini adalah data ulasan pelayanan hotel di kota Jakarta. Data diperoleh dari informasi yang diekstraksi secara otomatis dari halaman web dengan metode web scrapping dengan lokasi pengumpulan data didaerah Jakarta dengan kategori khusu yaitu "Hotel" dengan data yang didapatkan sebanyak 210 data.")
+        st.info("Data yang digunakan pada proyek ini adalah data ulasan pelayanan hotel di kota Jakarta. Data diperoleh dari informasi yang diekstraksi secara otomatis dari halaman web dengan metode web scrapping dengan lokasi pengumpulan data didaerah Jakarta dengan kategori khusu yaitu Hotel dengan data yang didapatkan sebanyak 210 data.")
         st.markdown("# Metode Usulan ")
         st.info("Random Forest")
         
