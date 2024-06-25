@@ -156,7 +156,7 @@ with st.container():
             st.write(df[['review', 'review_tokens']].head(20))
 
             st.info("## TF - IDF (Term Frequency Inverse Document Frequency)")
-            from sklearn.feature_extraction.text import TfidfVectorizer,CountVectorizer
+            from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
             countvectorizer = CountVectorizer()
             tfidfvectorizer = TfidfVectorizer()
             tfidf = TfidfVectorizer()
